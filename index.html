@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>RideWave — Premium Rides at Your Doorstep</title>
+  <meta name="description" content="Book instant rides across the city with RideWave. Fast, safe, affordable — with professional drivers and real-time tracking."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
+  <style>
+    .hero-layout{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:60px;min-height:calc(100vh - 68px);padding-top:68px}
+    @media(max-width:900px){.hero-layout{grid-template-columns:1fr}}
+    .section-label{font-size:.78rem;font-weight:700;color:var(--primary-light);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .section-label::before{content:'';display:block;width:24px;height:2px;background:var(--primary)}
+    .page-pad{padding-bottom:100px}
+  </style>
+</head>
+<body>
+
+<!-- ================================================
+  NAVBAR
+================================================ -->
+<nav id="navbar" class="navbar">
+  <div class="navbar-logo" onclick="navigate('landing')">
+    <div class="navbar-logo-icon">🌊</div>
+    <span class="navbar-logo-name">RideWave</span>
+  </div>
+  <div class="navbar-links">
+    <button class="navbar-link active" data-screen="landing">Home</button>
+    <button class="navbar-link" data-screen="booking">Book a Ride</button>
+    <button class="navbar-link" data-screen="history">My Rides</button>
+    <button class="navbar-link" data-screen="profile">Profile</button>
+  </div>
+  <div class="navbar-actions">
+    <button class="btn btn-primary btn-sm" onclick="navigate('booking')">🚗 Book Now</button>
+    <div class="navbar-avatar" onclick="navigate('profile')">AS</div>
+  </div>
+</nav>
+
+<!-- ================================================
+  TOAST CONTAINER
+================================================ -->
+<div id="toast-container"></div>
+
+<!-- ================================================
+  LANDING SCREEN
+================================================ -->
+<section id="screen-landing" class="screen active page-pad">
+  <!-- Hero -->
+  <div class="container">
+    <div class="hero-layout">
+      <!-- Left: text + quick book -->
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Now live in 50+ cities across India
+        </div>
+        <h1>Your City.<br/><span class="gradient-text">Your Ride.</span></h1>
+        <p class="hero-sub">Premium rides at your doorstep in minutes. Safe, affordable, and always on time — with professional drivers you can trust.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" onclick="navigate('booking')">🚗 Book a Ride</button>
+          <button class="btn btn-secondary btn-lg" onclick="navigate('history')">View My Rides</button>
+        </div>
+
+        <!-- Quick book widget -->
+        <div class="quick-book">
+          <div class="quick-book-title">Quick Book</div>
+          <div class="quick-book-inputs">
+            <div class="quick-book-input-row">
+              <div class="quick-book-dot cyan"></div>
+              <input id="qb-pickup" class="input-field no-icon" style="border-radius:10px" placeholder="📍 Where from?" list="location-list"/>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding-left:5px"><div class="quick-book-line"></div></div>
+            <div class="quick-book-input-row">
+              <div class="quick-book-dot amber"></div>
+              <input id="qb-drop" class="input-field no-icon" style="border-radius:10px" placeholder="🎯 Where to?" list="location-list"/>
+            </div>
+          </div>
+          <datalist id="location-list">
+            <option value="Bandra West"/><option value="Andheri East"/><option value="Juhu Beach"/>
+            <option value="Powai Lake"/><option value="Connaught Place"/><option value="Gateway of India"/>
+            <option value="Dadar Station"/><option value="Worli Sea Face"/><option value="Colaba Causeway"/>
+          </datalist>
+          <button class="btn btn-cyan w-full quick-book-btn" onclick="quickBook()">Find Rides →</button>
+        </div>
+      </div>
+
+      <!-- Right: hero map card -->
+      <div class="hero-visual flex justify-center" style="position:relative">
+        <div class="hero-map-card anim-float-subtle">
+          <canvas id="hero-map-canvas" style="width:100%;height:100%;display:block"></canvas>
+        </div>
+        <div class="hero-driver-card">
+          <div class="hero-driver-mini">
+            <div class="driver-mini-avatar">RK</div>
+            <div class="driver-mini-info">
+              <div class="name">Rajesh Kumar</div>
+              <div class="eta">🟢 Arriving in 3 min</div>
+              <div class="driver-mini-rating">⭐⭐⭐⭐⭐ <span style="color:var(--text-2)">4.9</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- Floating badges -->
+        <div style="position:absolute;top:-16px;left:-10px;background:var(--bg-2);border:1px solid var(--border-strong);border-radius:12px;padding:10px 14px;animation:float 4s ease-in-out infinite 1s;box-shadow:var(--shadow-md)">
+          <div style="font-size:.7rem;color:var(--text-2)">Rides today</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:800;color:var(--cyan)">12,483</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Background orbs -->
+  <div class="orb orb-primary anim-orb-1" style="width:600px;height:600px;top:-100px;right:-200px;position:fixed;z-index:-1"></div>
+  <div class="orb orb-cyan anim-orb-2" style="width:400px;height:400px;bottom:200px;left:-150px;position:fixed;z-index:-1"></div>
+
+  <!-- Stats -->
+  <div class="container">
+    <div class="stats-row" id="stats-row">
+      <div class="stat-item">
+        <div class="stat-value gradient-text-purple"><span data-count="10" data-suffix="M+">0</span></div>
+        <div class="stat-label">Happy Riders</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" style="color:var(--cyan)"><span data-count="50000" data-suffix="+">0</span></div>
+        <div class="stat-label">Active Drivers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" style="color:var(--amber)"><span data-count="50" data-suffix="+ Cities">0</span></div>
+        <div class="stat-label">Coverage</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" style="color:var(--green)"><span data-count="4" data-suffix=".9 ⭐">0</span></div>
+        <div class="stat-label">Average Rating</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="container section">
+    <div class="section-label">Why RideWave</div>
+    <h2>Built around <span class="gradient-text">your experience</span></h2>
+    <div class="features-grid" style="margin-top:40px">
+      <div class="feature-card anim-fade-in delay-100">
+        <div class="feature-icon purple">⚡</div>
+        <div class="feature-title">Lightning Fast</div>
+        <div class="feature-desc">Nearest driver matched in under 60 seconds. We get you moving fast.</div>
+      </div>
+      <div class="feature-card anim-fade-in delay-200">
+        <div class="feature-icon cyan">🛡️</div>
+        <div class="feature-title">Always Safe</div>
+        <div class="feature-desc">Every driver verified, rated, and insured. Real-time tracking shared with loved ones.</div>
+      </div>
+      <div class="feature-card anim-fade-in delay-300">
+        <div class="feature-icon amber">💰</div>
+        <div class="feature-title">Fair Pricing</div>
+        <div class="feature-desc">Transparent fares, no surge surprises. Know your price before you book.</div>
+      </div>
+      <div class="feature-card anim-fade-in delay-400">
+        <div class="feature-icon green">🌍</div>
+        <div class="feature-title">Eco-Friendly</div>
+        <div class="feature-desc">EV options available in select cities. Ride green, leave a smaller footprint.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle showcase -->
+  <div class="container section" style="padding-top:0">
+    <div class="section-label">Vehicle Options</div>
+    <h2>A ride for <span class="gradient-text">every occasion</span></h2>
+    <div class="vehicles-grid" style="margin-top:40px">
+      <div class="vehicle-card" style="--vc-color:#6C63FF" onclick="navigate('booking')">
+        <span class="vehicle-emoji">🚗</span>
+        <div class="vehicle-name">RideWave Go</div>
+        <div class="vehicle-desc">Affordable everyday rides</div>
+        <div class="vehicle-price text-primary">From ₹40</div>
+        <div class="vehicle-eta">⏱ ~3 min away</div>
+      </div>
+      <div class="vehicle-card" style="--vc-color:#00D4FF" onclick="navigate('booking')">
+        <span class="vehicle-emoji">🛵</span>
+        <div class="vehicle-name">RideWave Moto</div>
+        <div class="vehicle-desc">Beat the traffic fast</div>
+        <div class="vehicle-price text-cyan">From ₹20</div>
+        <div class="vehicle-eta">⚡ ~1 min away</div>
+      </div>
+      <div class="vehicle-card" style="--vc-color:#FFB830" onclick="navigate('booking')">
+        <span class="vehicle-emoji">🚙</span>
+        <div class="vehicle-name">RideWave XL</div>
+        <div class="vehicle-desc">Space for 6 passengers</div>
+        <div class="vehicle-price text-amber">From ₹90</div>
+        <div class="vehicle-eta">⏱ ~5 min away</div>
+      </div>
+      <div class="vehicle-card" style="--vc-color:#10D98E" onclick="navigate('booking')">
+        <span class="vehicle-emoji">🏎️</span>
+        <div class="vehicle-name">RideWave Premier</div>
+        <div class="vehicle-desc">Luxury experience</div>
+        <div class="vehicle-price text-green">From ₹160</div>
+        <div class="vehicle-eta">⏱ ~8 min away</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Driver CTA -->
+  <div class="container section" style="padding-top:0">
+    <div class="driver-cta">
+      <div>
+        <div class="section-label">For Drivers</div>
+        <h2 style="margin-bottom:14px">Earn on your<br/><span class="gradient-text">own schedule</span></h2>
+        <p style="color:var(--text-1);max-width:460px;line-height:1.7">Join 50,000+ drivers earning ₹25,000–₹60,000/month. Flexible hours, instant payouts, full support.</p>
+        <button class="btn btn-primary" style="margin-top:28px">Become a Driver →</button>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div class="glass-card" style="min-width:160px;text-align:center">
+          <div style="font-size:2rem;font-weight:900;font-family:'Outfit',sans-serif;color:var(--cyan)">₹45K</div>
+          <div style="font-size:.8rem;color:var(--text-2);margin-top:4px">Average monthly earnings</div>
+        </div>
+        <div class="glass-card" style="min-width:160px;text-align:center">
+          <div style="font-size:2rem;font-weight:900;font-family:'Outfit',sans-serif;color:var(--primary)">24 hrs</div>
+          <div style="font-size:.8rem;color:var(--text-2);margin-top:4px">Support availability</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="navbar-logo" style="margin-bottom:12px">
+            <div class="navbar-logo-icon">🌊</div>
+            <span class="navbar-logo-name">RideWave</span>
+          </div>
+          <div class="footer-brand-desc">Premium ride-hailing across India. Fast, safe, and always affordable.</div>
+        </div>
+        <div>
+          <div class="footer-col-title">Company</div>
+          <div class="footer-link">About Us</div>
+          <div class="footer-link">Careers</div>
+          <div class="footer-link">Press</div>
+          <div class="footer-link">Blog</div>
+        </div>
+        <div>
+          <div class="footer-col-title">Product</div>
+          <div class="footer-link" onclick="navigate('booking')">Book a Ride</div>
+          <div class="footer-link">Drive with Us</div>
+          <div class="footer-link">Safety</div>
+          <div class="footer-link">Cities</div>
+        </div>
+        <div>
+          <div class="footer-col-title">Support</div>
+          <div class="footer-link">Help Center</div>
+          <div class="footer-link">Contact Us</div>
+          <div class="footer-link">Privacy Policy</div>
+          <div class="footer-link">Terms of Service</div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 RideWave Technologies Pvt. Ltd.</span>
+        <span style="color:var(--text-3)">Made with ❤️ in India</span>
+      </div>
+    </div>
+  </footer>
+</section>
+
+<!-- ================================================
+  BOOKING SCREEN
+================================================ -->
+<section id="screen-booking" class="screen">
+  <div class="booking-screen">
+    <!-- Left Panel -->
+    <div class="booking-panel">
+      <button class="back-btn" onclick="navigate('landing')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </button>
+      <h3 style="margin-bottom:20px">Plan your ride</h3>
+
+      <!-- Location inputs -->
+      <div class="location-group">
+        <div class="location-row">
+          <div class="loc-dot cyan"></div>
+          <input id="pickup-input" class="loc-input" placeholder="Pickup location" autocomplete="off"/>
+        </div>
+        <div style="display:flex;align-items:center;padding-left:5px"><div class="loc-line"></div></div>
+        <div class="location-row">
+          <div class="loc-dot amber"></div>
+          <input id="dropoff-input" class="loc-input" placeholder="Drop location" autocomplete="off"/>
+        </div>
+        <button class="swap-btn" onclick="swapLocations()" title="Swap locations">⇅</button>
+      </div>
+
+      <!-- Autocomplete list -->
+      <div id="autocomplete-list" class="autocomplete-list hidden"></div>
+
+      <!-- Vehicle selector -->
+      <div class="vehicles-label">Choose ride type</div>
+      <div class="vehicle-options" id="vehicle-options">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Fare summary -->
+      <div class="fare-summary" id="fare-summary">
+        <div class="text-muted text-sm text-center" style="padding:8px">Enter pickup &amp; drop to see fare estimate</div>
+      </div>
+
+      <!-- Confirm -->
+      <button id="btn-confirm" class="btn btn-primary w-full btn-lg" onclick="confirmBooking()">Confirm Booking →</button>
+    </div>
+
+    <!-- Map area -->
+    <div class="booking-map-area">
+      <canvas id="booking-map-canvas"></canvas>
+      <div class="map-overlay-controls">
+        <div class="map-pill">📍 Live Map</div>
+        <div class="map-pill" id="map-status-pill">Select locations</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+  MATCHING SCREEN
+================================================ -->
+<section id="screen-matching" class="screen">
+  <div class="matching-screen">
+    <!-- BG orbs -->
+    <div class="matching-bg-orb" style="width:500px;height:500px;background:var(--primary);top:-100px;left:-150px"></div>
+    <div class="matching-bg-orb" style="width:300px;height:300px;background:var(--cyan);bottom:-100px;right:-100px"></div>
+
+    <!-- Searching state -->
+    <div id="matching-searching">
+      <div class="radar-container">
+        <div class="radar-base">
+          <div class="radar-scan"></div>
+          <div class="radar-ring" style="width:60%;height:60%"></div>
+          <div class="radar-ring" style="width:80%;height:80%"></div>
+          <div class="radar-ring" style="width:100%;height:100%"></div>
+          <div class="radar-center">🚗</div>
+        </div>
+      </div>
+      <div class="matching-status">
+        <h2>Finding your driver…</h2>
+        <p style="color:var(--text-2)">Matching you with the nearest verified driver</p>
+        <div class="matching-dots">
+          <div class="matching-dot"></div>
+          <div class="matching-dot"></div>
+          <div class="matching-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Driver found state -->
+    <div id="driver-found" class="hidden" style="width:100%;max-width:480px;padding:0 20px">
+      <div style="text-align:center;margin-bottom:20px">
+        <span style="font-size:2rem">🎉</span>
+        <h2 style="margin-top:8px">Driver Found!</h2>
+      </div>
+      <div class="driver-found-card">
+        <div class="driver-found-header">
+          <span class="driver-found-badge">✅ Verified Driver</span>
+        </div>
+        <div class="driver-profile-row">
+          <div class="driver-avatar-lg" id="df-avatar">RK</div>
+          <div class="driver-profile-info">
+            <div class="driver-name" id="df-name">Rajesh Kumar</div>
+            <div class="driver-rating" id="df-rating">⭐ 4.9</div>
+            <div class="driver-trips" id="df-trips">2,847 trips</div>
+          </div>
+        </div>
+        <div class="driver-car-row">
+          <div class="driver-car-info">
+            <div>
+              <div class="driver-car-name" id="df-car">Hyundai i20</div>
+              <div class="driver-car-plate" id="df-plate">MH 12 AB 3456</div>
+            </div>
+            <div class="driver-car-plate-badge" id="df-plate-badge">MH 12</div>
+          </div>
+        </div>
+        <div class="driver-eta-row">
+          <div class="driver-eta-item">
+            <div class="driver-eta-value" id="df-eta">3 min</div>
+            <div class="driver-eta-label">ETA</div>
+          </div>
+          <div style="width:1px;height:36px;background:var(--border)"></div>
+          <div class="driver-eta-item">
+            <div class="driver-eta-value" id="df-dist">–</div>
+            <div class="driver-eta-label">Distance</div>
+          </div>
+          <div style="width:1px;height:36px;background:var(--border)"></div>
+          <div class="driver-eta-item">
+            <div class="driver-eta-value" id="df-fare">₹–</div>
+            <div class="driver-eta-label">Est. Fare</div>
+          </div>
+        </div>
+        <div class="driver-actions">
+          <button class="btn btn-ghost" style="flex:1" onclick="toast('Calling...','Connecting you to the driver','info')">📞 Call</button>
+          <button class="btn btn-ghost" style="flex:1" onclick="toast('Message sent','Driver has been notified','success')">💬 Message</button>
+          <button class="btn btn-primary" style="flex:2" onclick="navigate('tracking')">🗺️ Track Driver</button>
+        </div>
+      </div>
+      <button class="btn btn-ghost w-full" style="margin-top:12px" onclick="navigate('booking')">← Change Ride</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+  TRACKING SCREEN
+================================================ -->
+<section id="screen-tracking" class="screen">
+  <div class="tracking-screen">
+    <div class="tracking-map">
+      <canvas id="tracking-map-canvas"></canvas>
+    </div>
+
+    <!-- Top bar -->
+    <div class="tracking-top">
+      <div class="tracking-driver-mini">
+        <div class="driver-avatar-lg" style="width:44px;height:44px;font-size:.88rem" id="tr-avatar">RK</div>
+        <div>
+          <div class="tracking-driver-name" id="tr-driver-name">Rajesh Kumar</div>
+          <div class="tracking-driver-car" id="tr-driver-car">Hyundai i20 · MH 12 AB 3456</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="tr-status" class="badge badge-primary">Driver En Route</span>
+        <button class="btn-icon circle" onclick="toast('Calling...','Connecting to driver','info')" title="Call driver">📞</button>
+      </div>
+    </div>
+
+    <!-- Bottom panel -->
+    <div class="tracking-bottom">
+      <!-- Trip stages -->
+      <div class="trip-stages">
+        <div class="trip-stage active" id="stage-0">
+          <div class="trip-stage-icon">🚗</div>
+          <div class="trip-stage-label">En Route</div>
+          <div class="trip-stage-line"></div>
+        </div>
+        <div class="trip-stage" id="stage-1">
+          <div class="trip-stage-icon">📍</div>
+          <div class="trip-stage-label">Arrived</div>
+          <div class="trip-stage-line"></div>
+        </div>
+        <div class="trip-stage" id="stage-2">
+          <div class="trip-stage-icon">▶️</div>
+          <div class="trip-stage-label">In Trip</div>
+          <div class="trip-stage-line"></div>
+        </div>
+        <div class="trip-stage" id="stage-3">
+          <div class="trip-stage-icon">🏁</div>
+          <div class="trip-stage-label">Done</div>
+        </div>
+      </div>
+
+      <!-- Trip info -->
+      <div class="trip-info-row">
+        <div class="trip-info-item">
+          <div class="trip-info-value" id="tr-eta">–</div>
+          <div class="trip-info-label">Est. Time</div>
+        </div>
+        <div class="trip-info-item">
+          <div class="trip-info-value" id="tr-dist">–</div>
+          <div class="trip-info-label">Distance</div>
+        </div>
+        <div class="trip-info-item">
+          <div class="trip-info-value" id="tr-fare">₹–</div>
+          <div class="trip-info-label">Fare</div>
+        </div>
+      </div>
+
+      <button class="btn btn-danger w-full btn-sm" style="margin-top:14px" onclick="navigate('landing');toast('Ride cancelled','Your booking has been cancelled','error')">Cancel Ride</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+  HISTORY SCREEN
+================================================ -->
+<section id="screen-history" class="screen page-pad">
+  <div class="history-screen">
+    <div class="container">
+      <div class="history-header">
+        <h2>My Rides</h2>
+        <p class="text-muted" style="margin-top:6px">Your complete ride history</p>
+        <div class="history-filters">
+          <button class="filter-btn active" data-filter="all"      onclick="setFilter('all')">All Rides</button>
+          <button class="filter-btn"        data-filter="completed" onclick="setFilter('completed')">Completed</button>
+          <button class="filter-btn"        data-filter="cancelled" onclick="setFilter('cancelled')">Cancelled</button>
+        </div>
+      </div>
+      <div class="rides-list" id="rides-list">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+  PROFILE SCREEN
+================================================ -->
+<section id="screen-profile" class="screen page-pad">
+  <div class="profile-screen">
+    <div class="profile-hero">
+      <div class="container" style="text-align:center">
+        <div class="profile-avatar-lg" id="p-initials">AS</div>
+        <div class="profile-name" id="p-name">Arjun Sharma</div>
+        <div class="profile-email" id="p-email">arjun.sharma@email.com</div>
+        <div class="profile-rating-row">
+          <span class="profile-stars">⭐⭐⭐⭐⭐</span>
+          <span>4.8 · Passenger Rating</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Wallet -->
+      <div class="wallet-card" style="margin-bottom:24px">
+        <div>
+          <div class="wallet-label">RideWave Wallet</div>
+          <div class="wallet-balance text-primary" id="p-wallet">₹2,450</div>
+          <div style="font-size:.78rem;color:var(--text-2);margin-top:4px">Member since January 2023</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-primary btn-sm" onclick="toast('Coming soon','Wallet top-up launching soon!','info')">+ Add Money</button>
+          <button class="btn btn-secondary btn-sm" onclick="toast('Opening...','','info')">Transfer</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-value text-primary" id="p-rides">47</div>
+          <div class="profile-stat-label">Total Rides</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value text-cyan" id="p-km">836</div>
+          <div class="profile-stat-label">Km Ridden</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value text-green" id="p-saved">₹1,240</div>
+          <div class="profile-stat-label">Total Saved</div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div style="font-size:.78rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Account Settings</div>
+      <div class="settings-card">
+        <div class="setting-item">
+          <div class="setting-item-icon" style="background:rgba(108,99,255,.15)">👤</div>
+          <div class="setting-item-text"><div class="setting-item-label">Personal Info</div><div class="setting-item-sub">Name, phone, email</div></div>
+          <span class="setting-item-arrow">›</span>
+        </div>
+        <div class="setting-item">
+          <div class="setting-item-icon" style="background:rgba(255,184,48,.15)">💳</div>
+          <div class="setting-item-text"><div class="setting-item-label">Payment Methods</div><div class="setting-item-sub">UPI · Debit card · Wallet</div></div>
+          <span class="setting-item-arrow">›</span>
+        </div>
+        <div class="setting-item">
+          <div class="setting-item-icon" style="background:rgba(0,212,255,.12)">🔔</div>
+          <div class="setting-item-text"><div class="setting-item-label">Notifications</div><div class="setting-item-sub">Ride alerts, offers, updates</div></div>
+          <span class="setting-item-arrow">›</span>
+        </div>
+        <div class="setting-item">
+          <div class="setting-item-icon" style="background:rgba(16,217,142,.12)">🛡️</div>
+          <div class="setting-item-text"><div class="setting-item-label">Safety Center</div><div class="setting-item-sub">Emergency contacts, SOS</div></div>
+          <span class="setting-item-arrow">›</span>
+        </div>
+        <div class="setting-item">
+          <div class="setting-item-icon" style="background:rgba(108,99,255,.12)">❓</div>
+          <div class="setting-item-text"><div class="setting-item-label">Help &amp; Support</div><div class="setting-item-sub">FAQs, raise a concern</div></div>
+          <span class="setting-item-arrow">›</span>
+        </div>
+        <div class="setting-item" onclick="navigate('landing');toast('Logged out','See you soon! 👋','info')">
+          <div class="setting-item-icon" style="background:rgba(255,71,119,.12)">🚪</div>
+          <div class="setting-item-text"><div class="setting-item-label" style="color:var(--red)">Log Out</div></div>
+          <span class="setting-item-arrow">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+  BOTTOM NAV
+================================================ -->
+<nav id="bottom-nav" class="bottom-nav">
+  <button class="bottom-nav-item active" data-screen="landing">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+    <div class="bottom-nav-dot"></div>
+  </button>
+  <button class="bottom-nav-item" data-screen="booking">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <span>Book</span>
+    <div class="bottom-nav-dot"></div>
+  </button>
+  <button class="bottom-nav-item" data-screen="history">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span>Rides</span>
+    <div class="bottom-nav-dot"></div>
+  </button>
+  <button class="bottom-nav-item" data-screen="profile">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+    <div class="bottom-nav-dot"></div>
+  </button>
+</nav>
+
+<!-- ================================================
+  MODAL — PAYMENT PROCESSING
+================================================ -->
+<div id="modal-payment" class="modal-overlay hidden">
+  <div class="modal-box" style="text-align:center;max-width:380px">
+    <div class="payment-processing">
+      <div class="payment-spinner"></div>
+      <h3 style="margin-bottom:8px">Processing Payment</h3>
+      <p class="text-muted">Securing your booking…</p>
+      <div style="margin-top:20px;background:var(--glass);border-radius:12px;padding:14px;display:flex;justify-content:space-between;font-size:.88rem">
+        <span>Payment via UPI</span>
+        <span class="text-green">✓ Secure</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================
+  MODAL — TRIP COMPLETE
+================================================ -->
+<div id="modal-trip-complete" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="trip-complete-inner">
+      <div class="trip-complete-icon">🏁</div>
+      <h2 style="margin-bottom:6px">Trip Complete!</h2>
+      <p class="text-muted">Hope you had a great ride</p>
+
+      <div class="trip-complete-route">
+        <div class="tc-route-row">
+          <div class="tc-dot" style="background:var(--cyan)"></div>
+          <span id="tc-from">–</span>
+        </div>
+        <div style="display:flex;padding-left:4px;margin:4px 0"><div class="tc-row-line"></div></div>
+        <div class="tc-route-row">
+          <div class="tc-dot" style="background:var(--amber)"></div>
+          <span id="tc-to">–</span>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;justify-content:space-between;font-size:.88rem">
+          <span class="text-muted">Driver</span><strong id="tc-driver">–</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.88rem;margin-top:8px">
+          <span class="text-muted">Distance</span><span id="tc-dist">–</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.88rem;margin-top:8px">
+          <span class="text-muted">Total Fare</span><strong class="text-primary" id="tc-fare">₹–</strong>
+        </div>
+      </div>
+
+      <p style="font-size:.9rem;margin-bottom:12px;font-weight:600">Rate your experience</p>
+      <div class="stars-row">
+        <span class="star-btn" onclick="setStarRating(1)">⭐</span>
+        <span class="star-btn" onclick="setStarRating(2)">⭐</span>
+        <span class="star-btn" onclick="setStarRating(3)">⭐</span>
+        <span class="star-btn" onclick="setStarRating(4)">⭐</span>
+        <span class="star-btn" onclick="setStarRating(5)">⭐</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-ghost" style="flex:1" onclick="submitRating()">Skip</button>
+        <button class="btn btn-primary" style="flex:2" onclick="submitRating()">Submit Rating 🎉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
